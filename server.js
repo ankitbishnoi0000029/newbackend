@@ -14,7 +14,7 @@ const port = process.env.PORT || 8000;
 const GAME_START_HOUR = 3;
 const GAME_START_MINUTE = 30;
 const GAME_DURATION_MINUTES = 12 * 60; // 12 hours in minutes
-const ROUND_DURATION_SECONDS = 15 * 60; // 2 minutes per round
+const ROUND_DURATION_SECONDS = 1 * 60; // 2 minutes per round
 const SAVE_BEFORE_END_SECONDS = 30; // Save 30 seconds before end
 
 // MIME types for static files
