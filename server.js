@@ -681,7 +681,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Handle round completion
+  // Handle round completio
   socket.on('round-complete', async (data) => {
     console.log('🏁 Round complete:', data);
 
