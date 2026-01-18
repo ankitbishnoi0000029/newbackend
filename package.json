@@ -9,9 +9,17 @@
     "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.2.3",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.16.1",
     "socket.io": "^4.7.0"
   },
-  "keywords": ["game", "real-time", "socket.io"],
+  "keywords": [
+    "game",
+    "real-time",
+    "socket.io"
+  ],
   "author": "",
   "license": "ISC"
 }
