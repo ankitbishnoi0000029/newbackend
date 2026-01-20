@@ -17,7 +17,7 @@ const GAME_START_HOUR_UTC = 3;  // 3:30 AM UTC = 9:00 AM IST
 const GAME_START_MINUTE_UTC = 30;
 const GAME_END_HOUR_UTC = 15;   // 3:30 PM UTC = 9:00 PM IST
 const GAME_END_MINUTE_UTC = 30;
-const ROUND_DURATION_SECONDS = 15 * 60; // 15 minutes per round
+const ROUND_DURATION_SECONDS = 1 * 60; // 15 minutes per round
 
 // MIME types for static files
 const mimeTypes = {
@@ -569,12 +569,12 @@ io.on('connection', (socket) => {
   }
 
   socket.on('disconnect', () => {
-    console.log('🔴 Socket disconnected:', socket.id);
+    // console.log('🔴 Socket disconnected:', socket.id);
   });
 
   // Handle user selections
   socket.on('user-selection', (data) => {
-    console.log('🎯 User selection:', data);
+    // console.log('🎯 User selection:', data);
 
     // Update server's wheel values
     if (data.a1 !== undefined) currentWheelValues.a1 = data.a1;
@@ -584,7 +584,7 @@ io.on('connection', (socket) => {
     if (data.c1 !== undefined) currentWheelValues.c1 = data.c1;
     if (data.c2 !== undefined) currentWheelValues.c2 = data.c2;
 
-    console.log('🔄 Updated wheel values:', currentWheelValues);
+    // console.log('🔄 Updated wheel values:', currentWheelValues);
 
     // Broadcast updated wheel values to all clients
     io.emit('wheel-values-update', {
@@ -605,14 +605,14 @@ io.on('connection', (socket) => {
 
   // Handle wheel results
   socket.on('wheel-result', (data) => {
-    console.log('🎡 Wheel result:', data);
+    // console.log('🎡 Wheel result:', data);
     roundResults[data.wheel] = data.result;
     io.emit('wheel-result', data);
   });
 
   // Handle game results
   socket.on('game-result', async (data) => {
-    console.log('🏆 Game result:', data);
+    // console.log('🏆 Game result:', data);
 
 
 
@@ -632,7 +632,7 @@ io.on('connection', (socket) => {
 
   // Handle round save
   socket.on('save-round', async (data) => {
-    console.log('💾 Saving round data:', data);
+    // console.log('💾 Saving round data:', data);
 
     try {
       const roundStartTime = new Date();
@@ -648,7 +648,7 @@ io.on('connection', (socket) => {
 
       if (result.success) {
         currentRoundId = result.roundId;
-        console.log(`✅ Round ${data.roundNumber} saved with ID: ${currentRoundId}`);
+        // console.log(`✅ Round ${data.roundNumber} saved with ID: ${currentRoundId}`);
       }
 
       io.emit('round-saved', {
@@ -657,7 +657,7 @@ io.on('connection', (socket) => {
         roundNumber: data.roundNumber
       });
     } catch (error) {
-      console.error('❌ Error saving round:', error);
+      // console.error('❌ Error saving round:', error);
       io.emit('round-saved', {
         success: false,
         error: error.message
@@ -666,49 +666,68 @@ io.on('connection', (socket) => {
   });
 
   // Handle round completio
-  let roundCompleted = false;
-
   socket.on('round-complete', async (data) => {
-    if (roundCompleted) {
-      console.log('⚠️ Round already completed, skipping insert');
+    // ❌ No active round
+    if (!currentRoundId) {
+      console.log('⚠️ No active round, ignoring');
       return;
     }
 
-    roundCompleted = true;
-
-    console.log('🏁 Round complete:', data);
-
-    const historyData = {
-      roundStartTime: currentRoundStartTime
-        ? currentRoundStartTime.toISOString()
-        : new Date().toISOString(),
-      a1: roundResults.a1,
-      a2: roundResults.a2,
-      b1: roundResults.b1,
-      b2: roundResults.b2,
-      c1: roundResults.c1,
-      c2: roundResults.c2
-    };
-
-    const historyResult = await insertHistory(historyData);
-
-    if (historyResult.success) {
-      console.log('✅ Round history saved');
+    // 🔒 GLOBAL LOCK CHECK
+    if (
+      roundCompletionLock.completed &&
+      roundCompletionLock.roundId === currentRoundId
+    ) {
+      console.log('⚠️ Round already completed globally, skipping insert');
+      return;
     }
 
-    if (currentRoundId) {
+    // 🔐 LOCK THE ROUND
+    roundCompletionLock.completed = true;
+    roundCompletionLock.roundId = currentRoundId;
+
+    console.log('🏁 Round complete (LOCKED):', currentRoundId);
+
+    try {
+      const historyData = {
+        roundId: currentRoundId, // 👈 IMPORTANT
+        roundStartTime: currentRoundStartTime
+          ? currentRoundStartTime.toISOString()
+          : new Date().toISOString(),
+        a1: roundResults.a1,
+        a2: roundResults.a2,
+        b1: roundResults.b1,
+        b2: roundResults.b2,
+        c1: roundResults.c1,
+        c2: roundResults.c2
+      };
+
+      const historyResult = await insertHistory(historyData);
+
+      if (!historyResult.success) {
+        throw new Error(historyResult.error);
+      }
+
       await updateGameRound(currentRoundId, {
         ...roundResults,
         status: 'completed'
       });
+
+      // Reset for next round
+      roundResults = { a1: null, a2: null, b1: null, b2: null, c1: null, c2: null };
+      currentRoundId = null;
+
+      io.emit('round-complete', data);
+      console.log('✅ Round completed & saved ONCE');
+
+    } catch (err) {
+      console.error('❌ Round completion failed:', err);
+
+      // 🔓 unlock if DB failed (important)
+      roundCompletionLock.completed = false;
     }
-
-    // Reset for next round
-    roundResults = { a1: null, a2: null, b1: null, b2: null, c1: null, c2: null };
-    currentRoundId = null;
-
-    io.emit('round-complete', data);
   });
+
 
 });
 
