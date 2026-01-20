@@ -48,15 +48,15 @@ let isGameCurrentlyActive = false; // Track current game state
 function getCurrentGamePeriod() {
   const now = new Date();
   const nowUTC = new Date(now.getTime() + (now.getTimezoneOffset() * 60000)); // Convert to UTC
-  
+
   // Calculate today's game start time in UTC (3:30 AM UTC = 9:00 AM IST)
   const gameStartTodayUTC = new Date(nowUTC);
   gameStartTodayUTC.setHours(GAME_START_HOUR_UTC, GAME_START_MINUTE_UTC, 0, 0);
-  
+
   // Calculate today's game end time in UTC (3:30 PM UTC = 9:00 PM IST)
   const gameEndTodayUTC = new Date(nowUTC);
   gameEndTodayUTC.setHours(GAME_END_HOUR_UTC, GAME_END_MINUTE_UTC, 0, 0);
-  
+
   // Convert to IST for display purposes (optional)
   const gameStartTodayIST = new Date(gameStartTodayUTC.getTime() + (5.5 * 60 * 60 * 1000));
   const gameEndTodayIST = new Date(gameEndTodayUTC.getTime() + (5.5 * 60 * 60 * 1000));
@@ -65,68 +65,68 @@ function getCurrentGamePeriod() {
   const isGameTime = nowUTC >= gameStartTodayUTC && nowUTC < gameEndTodayUTC;
 
   if (isGameTime) {
-      // Game is active - calculate current round
-      const totalSecondsSinceGameStart = Math.floor((nowUTC - gameStartTodayUTC) / 1000);
-      const currentRound = Math.floor(totalSecondsSinceGameStart / ROUND_DURATION_SECONDS) + 1; // 1-based round numbering
-      
-      // Calculate round time left
-      const secondsIntoCurrentRound = totalSecondsSinceGameStart % ROUND_DURATION_SECONDS;
-      const roundTimeLeft = Math.max(0, ROUND_DURATION_SECONDS - secondsIntoCurrentRound);
-      
-      // Calculate time until game ends (9:00 PM IST)
-      const timeUntilGameEnd = Math.max(0, Math.floor((gameEndTodayUTC - nowUTC) / 1000));
+    // Game is active - calculate current round
+    const totalSecondsSinceGameStart = Math.floor((nowUTC - gameStartTodayUTC) / 1000);
+    const currentRound = Math.floor(totalSecondsSinceGameStart / ROUND_DURATION_SECONDS) + 1; // 1-based round numbering
 
-      return {
-          isActive: true,
-          timeUntilEnd: timeUntilGameEnd,
-          currentRound: currentRound,
-          currentTime: nowUTC,
-          roundTimeLeft: roundTimeLeft,
-          gameStartTime: gameStartTodayUTC,
-          gameEndTime: gameEndTodayUTC,
-          // Indian times for display
-          gameStartIST: gameStartTodayIST,
-          gameEndIST: gameEndTodayIST,
-          gameHours: "9:00 AM to 9:00 PM IST"
-      };
+    // Calculate round time left
+    const secondsIntoCurrentRound = totalSecondsSinceGameStart % ROUND_DURATION_SECONDS;
+    const roundTimeLeft = Math.max(0, ROUND_DURATION_SECONDS - secondsIntoCurrentRound);
+
+    // Calculate time until game ends (9:00 PM IST)
+    const timeUntilGameEnd = Math.max(0, Math.floor((gameEndTodayUTC - nowUTC) / 1000));
+
+    return {
+      isActive: true,
+      timeUntilEnd: timeUntilGameEnd,
+      currentRound: currentRound,
+      currentTime: nowUTC,
+      roundTimeLeft: roundTimeLeft,
+      gameStartTime: gameStartTodayUTC,
+      gameEndTime: gameEndTodayUTC,
+      // Indian times for display
+      gameStartIST: gameStartTodayIST,
+      gameEndIST: gameEndTodayIST,
+      gameHours: "9:00 AM to 9:00 PM IST"
+    };
   } else {
-      // Game is closed - calculate time until next game
-      let timeUntilNextGame;
-      let nextGameStartUTC;
-      let nextGameStartIST;
+    // Game is closed - calculate time until next game
+    let timeUntilNextGame;
+    let nextGameStartUTC;
+    let nextGameStartIST;
 
-      if (nowUTC < gameStartTodayUTC) {
-          // Next game is today at 9:00 AM IST
-          nextGameStartUTC = gameStartTodayUTC;
-          nextGameStartIST = gameStartTodayIST;
-          timeUntilNextGame = Math.floor((gameStartTodayUTC - nowUTC) / 1000);
-      } else {
-          // Next game is tomorrow at 9:00 AM IST
-          const gameStartTomorrowUTC = new Date(gameStartTodayUTC);
-          gameStartTomorrowUTC.setDate(gameStartTomorrowUTC.getDate() + 1);
-          nextGameStartUTC = gameStartTomorrowUTC;
-          
-          const gameStartTomorrowIST = new Date(gameStartTomorrowUTC.getTime() + (5.5 * 60 * 60 * 1000));
-          nextGameStartIST = gameStartTomorrowIST;
-          timeUntilNextGame = Math.floor((gameStartTomorrowUTC - nowUTC) / 1000);
-      }
+    if (nowUTC < gameStartTodayUTC) {
+      // Next game is today at 9:00 AM IST
+      nextGameStartUTC = gameStartTodayUTC;
+      nextGameStartIST = gameStartTodayIST;
+      timeUntilNextGame = Math.floor((gameStartTodayUTC - nowUTC) / 1000);
+    } else {
+      // Next game is tomorrow at 9:00 AM IST
+      const gameStartTomorrowUTC = new Date(gameStartTodayUTC);
+      gameStartTomorrowUTC.setDate(gameStartTomorrowUTC.getDate() + 1);
+      nextGameStartUTC = gameStartTomorrowUTC;
 
-      return {
-          isActive: false,
-          timeUntilEnd: null,
-          currentRound: null,
-          currentTime: nowUTC,
-          roundTimeLeft: 0,
-          gameStartTime: gameStartTodayUTC,
-          gameEndTime: gameEndTodayUTC,
-          timeUntilNextGame: timeUntilNextGame,
-          nextGameStart: nextGameStartUTC,
-          nextGameStartIST: nextGameStartIST,
-          gameHours: "9:00 AM to 9:00 PM IST",
-          statusMessage: nowUTC < gameStartTodayUTC ? 
-              "Game will start at 9:00 AM IST" : 
-              "Game closed. Next game tomorrow at 9:00 AM IST"
-      };
+      const gameStartTomorrowIST = new Date(gameStartTomorrowUTC.getTime() + (5.5 * 60 * 60 * 1000));
+      nextGameStartIST = gameStartTomorrowIST;
+      timeUntilNextGame = Math.floor((gameStartTomorrowUTC - nowUTC) / 1000);
+    }
+
+    return {
+      isActive: false,
+      timeUntilEnd: null,
+      currentRound: null,
+      currentTime: nowUTC,
+      roundTimeLeft: 0,
+      gameStartTime: gameStartTodayUTC,
+      gameEndTime: gameEndTodayUTC,
+      timeUntilNextGame: timeUntilNextGame,
+      nextGameStart: nextGameStartUTC,
+      nextGameStartIST: nextGameStartIST,
+      gameHours: "9:00 AM to 9:00 PM IST",
+      statusMessage: nowUTC < gameStartTodayUTC ?
+        "Game will start at 9:00 AM IST" :
+        "Game closed. Next game tomorrow at 9:00 AM IST"
+    };
   }
 }
 
@@ -156,7 +156,7 @@ function startGameTimer(io) {
       if (!isGameCurrentlyActive) {
         isGameCurrentlyActive = true;
         console.log('🎮 Game activated at 9:00 AM IST');
-        
+
         // Send game state to all clients
         io.emit('game-state', {
           ...gamePeriod,
@@ -262,12 +262,12 @@ const httpServer = createServer(async (req, res) => {
 
   // Handle health check endpoint
   if (pathname === '/api/health' && req.method === 'GET') {
-    res.writeHead(200, { 
+    res.writeHead(200, {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*'
     });
-    res.end(JSON.stringify({ 
-      success: true, 
+    res.end(JSON.stringify({
+      success: true,
       message: 'Server is running',
       timestamp: new Date().toISOString()
     }));
@@ -278,15 +278,15 @@ const httpServer = createServer(async (req, res) => {
   if (pathname === '/api/login' && req.method === 'POST') {
     console.log('Login API request received');
     let body = '';
-    
+
     req.on('data', chunk => {
       body += chunk.toString();
     });
-    
+
     req.on('end', async () => {
       try {
         if (!body) {
-          res.writeHead(400, { 
+          res.writeHead(400, {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
           });
@@ -295,26 +295,26 @@ const httpServer = createServer(async (req, res) => {
         }
 
         const { username, password } = JSON.parse(body);
-        
+
         if (!username || !password) {
-          res.writeHead(400, { 
+          res.writeHead(400, {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
           });
           res.end(JSON.stringify({ success: false, error: 'Username and password are required' }));
           return;
         }
-        
+
         const result = await login(username, password);
-        
+
         if (result.success) {
-          res.writeHead(200, { 
+          res.writeHead(200, {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
           });
           res.end(JSON.stringify(result));
         } else {
-          res.writeHead(401, { 
+          res.writeHead(401, {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
           });
@@ -322,7 +322,7 @@ const httpServer = createServer(async (req, res) => {
         }
       } catch (error) {
         console.error('Login API error:', error);
-        res.writeHead(500, { 
+        res.writeHead(500, {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
         });
@@ -335,16 +335,16 @@ const httpServer = createServer(async (req, res) => {
   // Handle POST /api/token/verify - Verify token
   if (pathname === '/api/token/verify' && req.method === 'POST') {
     let body = '';
-    
+
     req.on('data', chunk => {
       body += chunk.toString();
     });
-    
+
     req.on('end', async () => {
       try {
         // Try to get token from body first, then from Authorization header
         let token = null;
-        
+
         if (body) {
           try {
             const parsed = JSON.parse(body);
@@ -353,7 +353,7 @@ const httpServer = createServer(async (req, res) => {
             // Body is not JSON, ignore
           }
         }
-        
+
         // If not in body, check Authorization header
         if (!token) {
           const authHeader = req.headers.authorization;
@@ -361,26 +361,26 @@ const httpServer = createServer(async (req, res) => {
             token = authHeader.substring(7);
           }
         }
-        
+
         if (!token) {
-          res.writeHead(400, { 
+          res.writeHead(400, {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
           });
           res.end(JSON.stringify({ success: false, error: 'Token is required. Provide in body as {token: "..."} or in Authorization header as Bearer token' }));
           return;
         }
-        
+
         const result = await verifyTokenFromDB(token);
-        
+
         if (result.success) {
-          res.writeHead(200, { 
+          res.writeHead(200, {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
           });
           res.end(JSON.stringify(result));
         } else {
-          res.writeHead(401, { 
+          res.writeHead(401, {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
           });
@@ -388,7 +388,7 @@ const httpServer = createServer(async (req, res) => {
         }
       } catch (error) {
         console.error('Verify token API error:', error);
-        res.writeHead(500, { 
+        res.writeHead(500, {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
         });
@@ -402,15 +402,15 @@ const httpServer = createServer(async (req, res) => {
   if (pathname === '/api/history' && req.method === 'GET') {
     try {
       const result = await getHistory();
-      
+
       if (result.success) {
-        res.writeHead(200, { 
+        res.writeHead(200, {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
         });
         res.end(JSON.stringify(result));
       } else {
-        res.writeHead(500, { 
+        res.writeHead(500, {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
         });
@@ -418,7 +418,7 @@ const httpServer = createServer(async (req, res) => {
       }
     } catch (error) {
       console.error('Get history API error:', error);
-      res.writeHead(500, { 
+      res.writeHead(500, {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       });
@@ -430,15 +430,15 @@ const httpServer = createServer(async (req, res) => {
   // Handle POST /api/history - Insert game history
   if (pathname === '/api/history' && req.method === 'POST') {
     let body = '';
-    
+
     req.on('data', chunk => {
       body += chunk.toString();
     });
-    
+
     req.on('end', async () => {
       try {
         if (!body) {
-          res.writeHead(400, { 
+          res.writeHead(400, {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
           });
@@ -447,30 +447,30 @@ const httpServer = createServer(async (req, res) => {
         }
 
         const historyData = JSON.parse(body);
-        
+
         // Validate required fields
-        if (historyData.a1 === undefined || historyData.a2 === undefined || 
-            historyData.b1 === undefined || historyData.b2 === undefined ||
-            historyData.c1 === undefined || historyData.c2 === undefined) {
-          res.writeHead(400, { 
+        if (historyData.a1 === undefined || historyData.a2 === undefined ||
+          historyData.b1 === undefined || historyData.b2 === undefined ||
+          historyData.c1 === undefined || historyData.c2 === undefined) {
+          res.writeHead(400, {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
           });
           res.end(JSON.stringify({ success: false, error: 'All wheel values (a1, a2, b1, b2, c1, c2) are required' }));
           return;
         }
-        
+
         // Insert history into database
         const result = await insertHistory(historyData);
-        
+
         if (result.success) {
-          res.writeHead(200, { 
+          res.writeHead(200, {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
           });
           res.end(JSON.stringify(result));
         } else {
-          res.writeHead(500, { 
+          res.writeHead(500, {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
           });
@@ -478,7 +478,7 @@ const httpServer = createServer(async (req, res) => {
         }
       } catch (error) {
         console.error('Insert history API error:', error);
-        res.writeHead(500, { 
+        res.writeHead(500, {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
         });
@@ -491,7 +491,7 @@ const httpServer = createServer(async (req, res) => {
   // Log all other requests for debugging
   if (pathname.startsWith('/api/')) {
     console.log(`API endpoint not found: ${req.method} ${pathname}`);
-    res.writeHead(404, { 
+    res.writeHead(404, {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*'
     });
@@ -549,7 +549,7 @@ io.on('connection', (socket) => {
   // Send current game state to new connection
   const gamePeriod = getCurrentGamePeriod();
   const currentTimeIST = new Date(new Date().getTime() + (5.5 * 60 * 60 * 1000));
-  
+
   if (gamePeriod.isActive) {
     socket.emit('game-state', {
       ...gamePeriod,
@@ -571,7 +571,7 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('🔴 Socket disconnected:', socket.id);
   });
-  
+
   // Handle user selections
   socket.on('user-selection', (data) => {
     console.log('🎯 User selection:', data);
@@ -585,7 +585,7 @@ io.on('connection', (socket) => {
     if (data.c2 !== undefined) currentWheelValues.c2 = data.c2;
 
     console.log('🔄 Updated wheel values:', currentWheelValues);
-    
+
     // Broadcast updated wheel values to all clients
     io.emit('wheel-values-update', {
       wheelValues: currentWheelValues,
@@ -613,25 +613,9 @@ io.on('connection', (socket) => {
   // Handle game results
   socket.on('game-result', async (data) => {
     console.log('🏆 Game result:', data);
-    
-    // Insert final round results into game_history
-    const historyData = {
-      roundStartTime: currentRoundStartTime ? currentRoundStartTime.toISOString() : new Date().toISOString(),
-      a1: roundResults.a1,
-      a2: roundResults.a2,
-      b1: roundResults.b1,
-      b2: roundResults.b2,
-      c1: roundResults.c1,
-      c2: roundResults.c2
-    };
 
-    const historyResult = await insertHistory(historyData);
-    if (historyResult.success) {
-      console.log('✅ Round history saved to database');
-    } else {
-      console.error('❌ Failed to save round history:', historyResult.error);
-    }
-    
+
+
     // Update round results
     Object.assign(roundResults, data.results);
 
@@ -682,22 +666,50 @@ io.on('connection', (socket) => {
   });
 
   // Handle round completio
+  let roundCompleted = false;
+
   socket.on('round-complete', async (data) => {
+    if (roundCompleted) {
+      console.log('⚠️ Round already completed, skipping insert');
+      return;
+    }
+
+    roundCompleted = true;
+
     console.log('🏁 Round complete:', data);
+
+    const historyData = {
+      roundStartTime: currentRoundStartTime
+        ? currentRoundStartTime.toISOString()
+        : new Date().toISOString(),
+      a1: roundResults.a1,
+      a2: roundResults.a2,
+      b1: roundResults.b1,
+      b2: roundResults.b2,
+      c1: roundResults.c1,
+      c2: roundResults.c2
+    };
+
+    const historyResult = await insertHistory(historyData);
+
+    if (historyResult.success) {
+      console.log('✅ Round history saved');
+    }
 
     if (currentRoundId) {
       await updateGameRound(currentRoundId, {
         ...roundResults,
         status: 'completed'
       });
-
-      // Reset for next round
-      roundResults = { a1: null, a2: null, b1: null, b2: null, c1: null, c2: null };
-      currentRoundId = null;
     }
+
+    // Reset for next round
+    roundResults = { a1: null, a2: null, b1: null, b2: null, c1: null, c2: null };
+    currentRoundId = null;
 
     io.emit('round-complete', data);
   });
+
 });
 
 httpServer.listen(port, (err) => {
