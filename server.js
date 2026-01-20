@@ -17,7 +17,7 @@ const GAME_START_HOUR_UTC = 3;  // 3:30 AM UTC = 9:00 AM IST
 const GAME_START_MINUTE_UTC = 30;
 const GAME_END_HOUR_UTC = 15;   // 3:30 PM UTC = 9:00 PM IST
 const GAME_END_MINUTE_UTC = 30;
-const ROUND_DURATION_SECONDS = 1 * 60; // 15 minutes per round
+const ROUND_DURATION_SECONDS = 2 * 60; // 15 minutes per round
 
 // MIME types for static files
 const mimeTypes = {
