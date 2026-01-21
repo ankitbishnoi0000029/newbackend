@@ -15,7 +15,7 @@ const port = process.env.PORT || 8000;
 // 9:00 PM IST = 3:30 PM UTC (15:30 UTC)
 const GAME_START_HOUR_UTC = 3;  // 3:30 AM UTC = 9:00 AM IST
 const GAME_START_MINUTE_UTC = 30;
-const GAME_END_HOUR_UTC = 15;   // 3:30 PM UTC = 9:00 PM IST
+const GAME_END_HOUR_UTC = 24;   // 3:30 PM UTC = 9:00 PM IST
 const GAME_END_MINUTE_UTC = 30;
 const ROUND_DURATION_SECONDS = 1 * 60; // 15 minutes per round
 
@@ -610,14 +610,14 @@ io.on('connection', (socket) => {
 
   // Handle wheel results
   socket.on('wheel-result', (data) => {
-    // console.log('🎡 Wheel result:', data);
+    console.log('🎡 Wheel result:', data);
     roundResults[data.wheel] = data.result;
     io.emit('wheel-result', data);
   });
 
   // Handle game results
   socket.on('game-result', async (data) => {
-    // console.log('🏆 Game result:', data);
+    console.log('🏆 Game result:', data);
 
 
 
