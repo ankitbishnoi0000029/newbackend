@@ -21,7 +21,7 @@ const port = process.env.PORT || 8000;
 
 const GAME_START_HOUR_UTC = 0;  // 3:30 AM UTC = 9:00 AM IST
 const GAME_START_MINUTE_UTC = 5;
-const GAME_END_HOUR_UTC = 0;   // 3:30 PM UTC = 9:00 PM IST
+const GAME_END_HOUR_UTC = 1;   // 3:30 PM UTC = 9:00 PM IST
 const GAME_END_MINUTE_UTC = 30;
 const ROUND_DURATION_SECONDS = 1 * 60; // 15 minutes per round
 // MIME types for static files
