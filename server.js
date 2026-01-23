@@ -748,7 +748,8 @@ io.on('connection', (socket) => {
 
 });
 
-httpServer.listen(port, (err) => {
+
+httpServer.listen(port, "0.0.0.0", (err) => {
   if (err) throw err;
-  console.log(`> Ready on http://${hostname}:${port}`);
+  console.log(`> Ready on port ${port}`);
 });
