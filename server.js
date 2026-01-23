@@ -619,7 +619,19 @@ io.on('connection', (socket) => {
   socket.on('game-result', async (data) => {
     console.log('🏆 Game result:', data);
 
+    const historyData = {
+      roundId: currentRoundId,
+      roundStartTime: currentRoundStartTime
+        ? currentRoundStartTime.toISOString()
+        : new Date().toISOString(),
+      ...data.results // insert all result fields (a1, a2, b1, b2, c1, c2, etc.) from the provided data
+    };
 
+    const historyResult = await insertHistory(historyData);
+
+    if (!historyResult.success) {
+      throw new Error(historyResult.error);
+    }
 
     // Update round results
     Object.assign(roundResults, data.results);
@@ -653,7 +665,7 @@ io.on('connection', (socket) => {
 
       if (result.success) {
         currentRoundId = result.roundId;
-        // console.log(`✅ Round ${data.roundNumber} saved with ID: ${currentRoundId}`);
+        console.log(`✅ Round ${data.roundNumber} saved with ID: ${currentRoundId}`);
       }
 
       io.emit('round-saved', {
@@ -694,24 +706,24 @@ io.on('connection', (socket) => {
     console.log('🏁 Round complete (LOCKED):', currentRoundId);
 
     try {
-      const historyData = {
-        roundId: currentRoundId, // 👈 IMPORTANT
-        roundStartTime: currentRoundStartTime
-          ? currentRoundStartTime.toISOString()
-          : new Date().toISOString(),
-        a1: roundResults.a1,
-        a2: roundResults.a2,
-        b1: roundResults.b1,
-        b2: roundResults.b2,
-        c1: roundResults.c1,
-        c2: roundResults.c2
-      };
+      // const historyData = {
+      //   roundId: currentRoundId, // 👈 IMPORTANT
+      //   roundStartTime: currentRoundStartTime
+      //     ? currentRoundStartTime.toISOString()
+      //     : new Date().toISOString(),
+      //   a1: roundResults.a1,
+      //   a2: roundResults.a2,
+      //   b1: roundResults.b1,
+      //   b2: roundResults.b2,
+      //   c1: roundResults.c1,
+      //   c2: roundResults.c2
+      // };
 
-      const historyResult = await insertHistory(historyData);
+      // const historyResult = await insertHistory(historyData);
 
-      if (!historyResult.success) {
-        throw new Error(historyResult.error);
-      }
+      // if (!historyResult.success) {
+      //   throw new Error(historyResult.error);
+      // }
 
       await updateGameRound(currentRoundId, {
         ...roundResults,
