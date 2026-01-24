@@ -13,7 +13,7 @@ const host = '0.0.0.0'; // Listen on all network interfaces
 // Indian timing: 9:00 AM to 9:00 PM IST
 const GAME_START_HOUR_UTC = 3;
 const GAME_START_MINUTE_UTC = 30;
-const GAME_END_HOUR_UTC = 15;
+const GAME_END_HOUR_UTC = 30;
 const GAME_END_MINUTE_UTC = 32;
 const ROUND_DURATION_SECONDS = 1 * 60;
 
